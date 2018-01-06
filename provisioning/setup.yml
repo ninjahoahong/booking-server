@@ -1,0 +1,9 @@
+---
+- name: install java, clojure, and devtools
+  hosts: all
+  remote_user: root
+  become: yes
+  become_method: sudo
+
+  roles:
+    - dev
