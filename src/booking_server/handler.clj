@@ -1,11 +1,4 @@
-(ns booking-server.handler
-  (:require [compojure.core :refer [defroutes routes]]
-            [ring.middleware.resource :refer [wrap-resource]]
-            [ring.middleware.file-info :refer [wrap-file-info]]
-            [hiccup.middleware :refer [wrap-base-url]]
-            [compojure.handler :as handler]
-            [compojure.route :as route]
-            [booking-server.routes.home :refer [home-routes]]))
+(ns booking-server.handler)
 
 (defn init []
   (println "booking-server is starting"))
@@ -13,11 +6,9 @@
 (defn destroy []
   (println "booking-server is shutting down"))
 
-(defroutes app-routes
-  (route/resources "/")
-  (route/not-found "Not Found"))
+(defn handler [request]
+  {:status  200
+   :headers {"Content-Type" "text/html"}
+   :body    "Hell World"})
 
-(def app
-  (-> (routes home-routes app-routes)
-      (handler/site)
-      (wrap-base-url)))
+(def app handler)
