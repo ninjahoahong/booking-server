@@ -27,6 +27,9 @@
     - wget
     - vim
     - curl
+    - python
+    - python-psycopg2
+    - libpq-dev
   tags:
     - install
   become: yes
@@ -52,3 +55,50 @@
   shell: bash -c "cd /usr/local/bin && curl -fsSLo boot https://github.com/boot-clj/boot-bin/releases/download/latest/boot.sh && chmod 755 boot"
   become: yes
   become_method: sudo
+
+- name: install postgresql and postgres contrib
+  apt: pkg="{{ item }}" state=installed update-cache=yes
+  with_items:
+    - postgresql
+    - postgresql-contrib
+  tags:
+    - install
+    - postgresql
+  become: yes
+  become_method: sudo
+
+- name: Start posgresql service
+  service:
+    name: postgresql
+    enabled: yes
+    state: started
+
+- name: create dev postgresdb with the name define in variables
+  postgresql_db:
+    name: "{{ dev_db_name }}"
+    encoding: UTF-8
+    template: template0
+  tags:
+    - postgresql
+  become: yes
+  become_method: su
+  become_user: postgres
+
+- name: create dev postgresql admin user and grant access to the database table
+  postgresql_user:
+    db: "{{ dev_db_name }}"
+    name: "{{ dev_db_user_name }}"
+    password: NULL
+    priv: "CONNECT/{{ dev_db_name }}:ALL"
+  tags:
+    - postgresql
+  become: yes
+  become_method: su
+  become_user: postgres
+
+#- name: Ensure user does not have unnecessary privileges
+#  sudo_user: postgres
+#  postgresql_user:
+#    name={{ db_user }}
+#               role_attr_flags=NOSUPERUSER,NOCREATEDB
+#               state=pr
